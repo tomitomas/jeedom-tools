@@ -1,6 +1,6 @@
 <?php
 
-trait ToMitOmAsEqLogicTrait {
+trait tomitomasEqLogicTrait {
 
     public function createCommands(string $file, string $type) {
         $configFile = self::getFileContent($file);
