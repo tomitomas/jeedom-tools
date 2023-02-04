@@ -4,7 +4,7 @@
     "license": "MIT",
     "autoload": {
         "psr-0": {
-            "ToMitOmAsEqLogicTrait": "src/"
+            "tomitomasEqLogicTrait": "src/"
         }
     },
     "authors": [
