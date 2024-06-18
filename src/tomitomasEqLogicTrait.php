@@ -158,6 +158,17 @@ trait tomitomasEqLogicTrait {
         }
     }
 
+    public static function getConfigForCommunity() {
+
+        $infoPlugin = '<b>Version OS</b> : ' .  system::getDistrib() . ' ' . system::getOsVersion() . '<br/>';
+
+        $infoPlugin .= '<b>Version PHP</b> : ' . phpversion();
+
+        $infoPlugin = '<br/>```<br/>' . str_replace(array('<b>', '</b>', '&nbsp;'), array('', '', ' '), $infoPlugin) . '<br/>```<br/>';
+
+        return $infoPlugin;
+    }
+
     /**
      ******************** LOGS FUNCTIONS
      */
