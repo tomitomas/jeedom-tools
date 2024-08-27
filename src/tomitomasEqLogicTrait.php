@@ -158,15 +158,21 @@ trait tomitomasEqLogicTrait {
         }
     }
 
-    public static function getConfigForCommunity() {
+    public static function getConfigForCommunity($withQuote = true) {
 
         $infoPlugin = '<b>Version OS</b> : ' .  system::getDistrib() . ' ' . system::getOsVersion() . '<br/>';
 
         $infoPlugin .= '<b>Version PHP</b> : ' . phpversion();
 
-        $infoPlugin = '<br/>```<br/>' . str_replace(array('<b>', '</b>', '&nbsp;'), array('', '', ' '), $infoPlugin) . '<br/>```<br/>';
+        if ($withQuote) {
+            return self::getPreformattedText($infoPlugin);
+        }
 
         return $infoPlugin;
+    }
+
+    public static function getPreformattedText($string) {
+        return '<br/>```text<br/>' . str_replace(array('<b>', '</b>', '&nbsp;'), array('', '', ' '), $string) . '<br/>```<br/>';
     }
 
     /**
