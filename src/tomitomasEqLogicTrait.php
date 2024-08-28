@@ -175,6 +175,35 @@ trait tomitomasEqLogicTrait {
         return '<br/>```text<br/>' . str_replace(array('<b>', '</b>', '&nbsp;'), array('', '', ' '), $string) . '<br/>```<br/>';
     }
 
+    public static function backupExclude() {
+        return [
+            'resources/venv'
+        ];
+    }
+
+    private static function pythonRequirementsInstalled(string $pythonPath, string $requirementsPath) {
+        if (!file_exists($pythonPath) || !file_exists($requirementsPath)) {
+            return false;
+        }
+        exec("{$pythonPath} -m pip freeze", $packages_installed);
+        $packages = join("||", $packages_installed);
+        exec("cat {$requirementsPath}", $packages_needed);
+        foreach ($packages_needed as $line) {
+            if (preg_match('/([^\s]+)[\s]*([>=~]=)[\s]*([\d+\.?]+)$/', $line, $need) === 1) {
+                if (preg_match('/' . $need[1] . '==([\d+\.?]+)/', $packages, $install) === 1) {
+                    if ($need[2] == '==' && $need[3] != $install[1]) {
+                        return false;
+                    } elseif (version_compare($need[3], $install[1], '>')) {
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     /**
      ******************** LOGS FUNCTIONS
      */
