@@ -110,10 +110,15 @@ trait tomitomasEqLogicTrait {
         }
     }
 
-    public static function createListOption($data, $dict) {
+    public static function createListOption($data, $dict, $filter = array()) {
 
         $list = '';
+        $needFilter = count($filter) > 0;
         foreach ($data as $item) {
+            if ($needFilter && !in_array($item, $filter)) {
+                self::warning($item . ' ' . __('valeur filtrée, on passe', __FILE__));
+                continue;
+            }
             $val = $dict[$item] ?? $item;
             $list .= $item . '|' . $val . ';';
         }
