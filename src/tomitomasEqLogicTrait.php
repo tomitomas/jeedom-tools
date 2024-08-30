@@ -2,12 +2,29 @@
 
 trait tomitomasEqLogicTrait {
 
-    public function createCommands(string $file, string $type) {
-        $configFile = self::getFileContent($file);
-        $dict = $configFile['dictionary'];
+    private static function getConfigFileContent($filePath) {
+        if (!file_exists($filePath)) {
+            throw new Exception(__("Fichier de configuration non trouvé", __FILE__) . ' ' . $filePath);
+        }
+        $content = file_get_contents($filePath);
+        if (!is_json($content)) {
+            throw new Exception(__("Fichier de configuration incorrecte", __FILE__) . ' ' . $filePath);
+        }
+        $content = translate::exec($content, realpath($filePath));
+        return json_decode($content, true);
+    }
+
+    public function createCommands($filePath, $type = null) {
         try {
-            if (isset($configFile['cmds'][$type])) {
-                $this->createCommandsFromConfigFile($configFile['cmds'][$type], $dict);
+
+            // on traduit le fichier de configuration
+            $configFile = self::getConfigFileContent($filePath);
+
+            // on lance la création des commandes (déjà traduites) et on partage le dictionnaire (pour les listes des valeurs)
+            if ($type == null) {
+                $this->createCommandsFromConfig($configFile['cmds']);
+            } elseif (isset($configFile['cmds'][$type])) {
+                $this->createCommandsFromConfig($configFile['cmds'][$type]);
             } else {
                 self::error($type . ' not found in config');
             }
@@ -32,7 +49,7 @@ trait tomitomasEqLogicTrait {
         return $content;
     }
 
-    public function createCommandsFromConfigFile($commands, $dict) {
+    public function createCommandsFromConfig($commands) {
         $cmd_updated_by = array();
         foreach ($commands as $cmdData) {
             $cmd = $this->getCmd(null, $cmdData["logicalId"]);
@@ -72,10 +89,6 @@ trait tomitomasEqLogicTrait {
 
             if (isset($cmdData['configuration'])) {
                 foreach ($cmdData['configuration'] as $key => $value) {
-                    if ($key == 'listValueToCreate') {
-                        $key = 'listValue';
-                        $value = self::createListOption(explode(";", $value), $dict);
-                    }
                     $cmd->setConfiguration($key, $value);
                 }
             }
@@ -131,8 +144,36 @@ trait tomitomasEqLogicTrait {
         return ($nb > 1) ? 's' : '';
     }
 
-    /**
+    public static function getConfigForCommunity($withQuote = true) {
+
+        $infoPlugin = '<b>Version OS</b> : ' .  system::getDistrib() . ' ' . system::getOsVersion() . '<br/>';
+
+        $infoPlugin .= '<b>Version PHP</b> : ' . phpversion();
+
+        if ($withQuote) {
+            return self::getPreformattedText($infoPlugin);
+        }
+
+        return $infoPlugin;
+    }
+
+    public static function getPreformattedText($string) {
+        return '<br/>```text<br/>' . str_replace(array('<b>', '</b>', '&nbsp;'), array('', '', ' '), $string) . '<br/>```<br/>';
+    }
+
+    public static function backupExclude() {
+        return [
+            'resources/venv'
+        ];
+    }
+
+
+    /*******************************
      * From @Mips2648
+     ******************************* /
+     
+    
+    /**
      * Allow to perform a // task exec : now or later
      *
      * @param string $_method
@@ -161,29 +202,6 @@ trait tomitomasEqLogicTrait {
         } else {
             self::debug("Task '{$_method}' scheduled at {$_date}");
         }
-    }
-
-    public static function getConfigForCommunity($withQuote = true) {
-
-        $infoPlugin = '<b>Version OS</b> : ' .  system::getDistrib() . ' ' . system::getOsVersion() . '<br/>';
-
-        $infoPlugin .= '<b>Version PHP</b> : ' . phpversion();
-
-        if ($withQuote) {
-            return self::getPreformattedText($infoPlugin);
-        }
-
-        return $infoPlugin;
-    }
-
-    public static function getPreformattedText($string) {
-        return '<br/>```text<br/>' . str_replace(array('<b>', '</b>', '&nbsp;'), array('', '', ' '), $string) . '<br/>```<br/>';
-    }
-
-    public static function backupExclude() {
-        return [
-            'resources/venv'
-        ];
     }
 
     private static function pythonRequirementsInstalled(string $pythonPath, string $requirementsPath) {
