@@ -2,7 +2,7 @@
 
 trait tomitomasEqLogicTrait {
 
-    private static function getConfigFileContent($filePath) {
+    public static function getConfigFileContent($filePath) {
         if (!file_exists($filePath)) {
             throw new Exception(__("Fichier de configuration non trouvé", __FILE__) . ' ' . $filePath);
         }
