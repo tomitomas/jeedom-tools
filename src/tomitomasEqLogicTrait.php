@@ -167,6 +167,29 @@ trait tomitomasEqLogicTrait {
         ];
     }
 
+    public static function deleteDirectory($dir) {
+        if (!file_exists($dir)) {
+            return false;
+        }
+
+        if (!is_dir($dir)) {
+            return false;
+        }
+
+        $items = array_diff(scandir($dir), array('.', '..'));
+
+        foreach ($items as $item) {
+            $path = $dir . DIRECTORY_SEPARATOR . $item;
+
+            if (is_dir($path)) {
+                self::deleteDirectory($path);
+            } else {
+                unlink($path);
+            }
+        }
+
+        return rmdir($dir);
+    }
 
     /*******************************
      * From @Mips2648
